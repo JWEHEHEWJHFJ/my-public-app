@@ -21,6 +21,30 @@ const STATUS_LAPORAN = {
   TINDAK_LANJUT: "Perlu Tindak Lanjut"
 };
 
+/* ---------------------------------------------------------------------
+ * Konfigurasi penyimpanan data di GitHub.
+ * - Laporan disimpan sebagai GitHub Issues pada repository yang dikonfigurasi
+ *   pengguna di halaman "Pengaturan GitHub".
+ * - Data sekolah disimpan sebagai berkas JSON (SEKOLAH_JSON_PATH) di root
+ *   repository yang sama, dibaca/ditulis lewat GitHub Contents API.
+ * ------------------------------------------------------------------- */
+
+const SEKOLAH_JSON_PATH = "sekolah.json";
+const LABEL_LAPORAN = "laporan";
+const LABEL_SEKOLAH_PREFIX = "sekolah:";
+const LABEL_KATEGORI_PREFIX = "kategori:";
+
+const STATUS_LABEL = {
+  MENUNGGU: "status:menunggu",
+  DITINJAU: "status:ditinjau",
+  DISETUJUI: "status:disetujui",
+  TINDAK_LANJUT: "status:tindak-lanjut"
+};
+
+const STATUS_LABEL_TO_KEY = Object.fromEntries(
+  Object.entries(STATUS_LABEL).map(([key, label]) => [label, key])
+);
+
 const SEED_SEKOLAH = [
   {
     id: "SKL-001",

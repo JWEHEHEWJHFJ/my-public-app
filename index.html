@@ -43,6 +43,9 @@
       <button class="nav-item" data-view="sekolah" type="button">
         <span class="nav-ico">&#127979;</span> Sekolah Binaan
       </button>
+      <button class="nav-item" data-view="pengaturan" type="button">
+        <span class="nav-ico">&#9881;</span> Pengaturan GitHub
+      </button>
     </nav>
 
     <div class="role-switch">
@@ -58,7 +61,7 @@
     </div>
 
     <div class="sidebar-foot">
-      <p>Data tersimpan lokal di peramban ini.</p>
+      <p id="connStatus">Memeriksa koneksi GitHub&hellip;</p>
     </div>
   </aside>
 
@@ -72,6 +75,14 @@
       </div>
       <div class="topbar-date" id="topbarDate"></div>
     </header>
+
+    <div class="banner" id="setupBanner" hidden>
+      <div>
+        <b>Belum terhubung ke GitHub.</b>
+        <span>Aplikasi sedang menampilkan data contoh (lokal). Buka <button class="link-btn inline" data-view="pengaturan" type="button">Pengaturan GitHub</button> untuk menyimpan data laporan sungguhan di repository GitHub Anda.</span>
+      </div>
+    </div>
+    <div class="banner banner-error" id="errorBanner" hidden></div>
 
     <!-- ---------- VIEW: DASHBOARD ---------- -->
     <section class="view" id="view-dashboard">
@@ -101,6 +112,7 @@
         <select id="filterSekolah"><option value="">Semua sekolah</option></select>
         <select id="filterKategori"><option value="">Semua kategori</option></select>
         <select id="filterStatus"><option value="">Semua status</option></select>
+        <button class="btn-secondary" id="refreshLaporanBtn" type="button">&#8635; Muat ulang</button>
       </div>
       <div class="panel">
         <div id="fullList" class="ledger"></div>
@@ -113,7 +125,7 @@
       <div class="panel form-panel">
         <div class="panel-head">
           <h2>Formulir laporan sekolah</h2>
-          <p class="panel-desc">Laporan akan diteruskan kepada pengawas pembina sekolah Anda.</p>
+          <p class="panel-desc">Laporan akan disimpan sebagai GitHub Issue dan dapat langsung dilihat pengawas.</p>
         </div>
         <form id="laporanForm">
           <div class="field-row">
@@ -146,7 +158,7 @@
             <p id="lampiranPreviewName" class="hint-text"></p>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn-primary">Kirim laporan</button>
+            <button type="submit" class="btn-primary" id="submitLaporanBtn">Kirim laporan</button>
             <span class="form-status" id="formStatus"></span>
           </div>
         </form>
@@ -158,6 +170,7 @@
       <div class="panel">
         <div class="panel-head">
           <h2>Tambah sekolah binaan</h2>
+          <p class="panel-desc">Tersimpan ke berkas <code>sekolah.json</code> di repository GitHub.</p>
         </div>
         <form id="sekolahForm" class="field-row wrap">
           <div class="field">
@@ -187,14 +200,71 @@
             <input type="text" id="sAlamat" required>
           </div>
           <div class="field field-btn">
-            <button type="submit" class="btn-primary">Tambah sekolah</button>
+            <button type="submit" class="btn-primary" id="submitSekolahBtn">Tambah sekolah</button>
           </div>
         </form>
       </div>
 
       <div class="panel">
-        <div class="panel-head"><h2>Daftar sekolah binaan</h2></div>
+        <div class="panel-head">
+          <h2>Daftar sekolah binaan</h2>
+          <button class="btn-secondary" id="refreshSekolahBtn" type="button">&#8635; Muat ulang</button>
+        </div>
         <div id="schoolTable" class="school-table"></div>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: PENGATURAN GITHUB ---------- -->
+    <section class="view" id="view-pengaturan" hidden>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Sambungkan ke repository GitHub</h2>
+          <p class="panel-desc">Semua laporan tersimpan sebagai GitHub Issues, dan data sekolah tersimpan di berkas <code>sekolah.json</code> pada repository ini &mdash; sehingga sekolah dan pengawas melihat data yang sama.</p>
+        </div>
+        <form id="configForm">
+          <div class="field-row">
+            <div class="field">
+              <label for="cfgOwner">Pemilik / organisasi GitHub</label>
+              <input type="text" id="cfgOwner" placeholder="contoh: dinaspendidikan-kotaX">
+            </div>
+            <div class="field">
+              <label for="cfgRepo">Nama repository</label>
+              <input type="text" id="cfgRepo" placeholder="contoh: buku-pengawas">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="cfgBranch">Branch</label>
+              <input type="text" id="cfgBranch" placeholder="main" value="main">
+            </div>
+            <div class="field">
+              <label for="cfgToken">Personal Access Token Anda (opsional untuk membaca, wajib untuk mengirim/meninjau)</label>
+              <input type="password" id="cfgToken" placeholder="github_pat_xxxxxxxxxxxx">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Simpan &amp; sambungkan</button>
+            <button type="button" class="btn-secondary" id="useDemoBtn">Gunakan data contoh (mode demo)</button>
+            <span class="form-status" id="configStatus"></span>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Cara menyiapkan repository &amp; token</h2></div>
+        <ol class="howto-list">
+          <li>Buat repository baru di GitHub (boleh publik atau privat) dan aktifkan GitHub Pages seperti biasa.</li>
+          <li>Di repository tersebut, buka tab <b>Issues</b> lalu pastikan fitur Issues aktif (Settings &rarr; Features &rarr; centang Issues).</li>
+          <li>Tambahkan berkas <code>sekolah.json</code> berisi <code>[]</code> (array kosong) di root repository sebagai data sekolah awal.</li>
+          <li>Setiap pengguna (pengawas maupun operator sekolah) membuat <b>Fine-grained Personal Access Token</b> miliknya sendiri di
+            <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">github.com/settings/tokens</a>,
+            dibatasi hanya untuk repository ini, dengan izin <b>Issues: Read and write</b> dan <b>Contents: Read and write</b>.</li>
+          <li>Tempel token tersebut pada kolom di atas. Token hanya disimpan di peramban milik pengguna itu sendiri &mdash; tidak pernah dikirim ke server lain selain langsung ke api.github.com.</li>
+        </ol>
+        <p class="hint-text security-note">
+          Peringatan keamanan: karena ini situs statis tanpa server, token tersimpan di localStorage peramban.
+          Jangan gunakan token dengan akses penuh ke akun/repo lain &mdash; selalu buat fine-grained token yang dibatasi hanya pada repository ini.
+        </p>
       </div>
     </section>
 
