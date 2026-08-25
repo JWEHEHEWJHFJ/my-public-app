@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buku Pengawas &mdash; Aplikasi Pengawas Sekolah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="34" height="34">
+          <circle cx="20" cy="20" r="18" fill="none" stroke="var(--color-gold)" stroke-width="1.4"/>
+          <circle cx="20" cy="20" r="13" fill="none" stroke="var(--color-gold)" stroke-width="1"/>
+          <path d="M20 11 L22.3 17.2 L29 17.6 L23.6 21.6 L25.6 28 L20 24.2 L14.4 28 L16.4 21.6 L11 17.6 L17.7 17.2 Z" fill="var(--color-gold)"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <p class="brand-title">Buku Pengawas</p>
+        <p class="brand-sub">Sistem Laporan Sekolah</p>
+      </div>
+    </div>
+
+    <nav class="nav-group" id="navGroup">
+      <p class="nav-label">Menu</p>
+      <button class="nav-item" data-view="dashboard" type="button">
+        <span class="nav-ico">&#9670;</span> Ringkasan
+      </button>
+      <button class="nav-item" data-view="laporan" type="button">
+        <span class="nav-ico">&#9776;</span> Daftar Laporan
+      </button>
+      <button class="nav-item" data-view="kirim" type="button">
+        <span class="nav-ico">&#9998;</span> Kirim Laporan
+      </button>
+      <button class="nav-item" data-view="sekolah" type="button">
+        <span class="nav-ico">&#127979;</span> Sekolah Binaan
+      </button>
+    </nav>
+
+    <div class="role-switch">
+      <p class="nav-label">Masuk sebagai</p>
+      <div class="segmented" id="roleSegmented">
+        <button class="seg-btn is-active" data-role="pengawas" type="button">Pengawas</button>
+        <button class="seg-btn" data-role="sekolah" type="button">Sekolah</button>
+      </div>
+      <div id="sekolahLoginWrap" class="sekolah-login" hidden>
+        <label for="sekolahLoginSelect">Nama sekolah</label>
+        <select id="sekolahLoginSelect"></select>
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <p>Data tersimpan lokal di peramban ini.</p>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <p class="topbar-eyebrow" id="topbarEyebrow">Ringkasan</p>
+        <h1 class="topbar-title" id="topbarTitle">Ikhtisar pengawasan</h1>
+      </div>
+      <div class="topbar-date" id="topbarDate"></div>
+    </header>
+
+    <!-- ---------- VIEW: DASHBOARD ---------- -->
+    <section class="view" id="view-dashboard">
+      <div class="stat-grid" id="statGrid"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Laporan masuk terbaru</h2>
+          <button class="link-btn" data-view="laporan" type="button">Lihat semua &rarr;</button>
+        </div>
+        <div id="recentList" class="ledger"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Sekolah binaan</h2>
+          <button class="link-btn" data-view="sekolah" type="button">Kelola &rarr;</button>
+        </div>
+        <div id="schoolSummary" class="school-summary-grid"></div>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: DAFTAR LAPORAN ---------- -->
+    <section class="view" id="view-laporan" hidden>
+      <div class="filter-bar">
+        <input type="search" id="filterSearch" placeholder="Cari judul atau isi laporan...">
+        <select id="filterSekolah"><option value="">Semua sekolah</option></select>
+        <select id="filterKategori"><option value="">Semua kategori</option></select>
+        <select id="filterStatus"><option value="">Semua status</option></select>
+      </div>
+      <div class="panel">
+        <div id="fullList" class="ledger"></div>
+        <p id="emptyState" class="empty-state" hidden>Tidak ada laporan yang cocok dengan filter ini.</p>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: KIRIM LAPORAN ---------- -->
+    <section class="view" id="view-kirim" hidden>
+      <div class="panel form-panel">
+        <div class="panel-head">
+          <h2>Formulir laporan sekolah</h2>
+          <p class="panel-desc">Laporan akan diteruskan kepada pengawas pembina sekolah Anda.</p>
+        </div>
+        <form id="laporanForm">
+          <div class="field-row">
+            <div class="field">
+              <label for="fSekolah">Sekolah pelapor</label>
+              <select id="fSekolah" required></select>
+            </div>
+            <div class="field">
+              <label for="fKategori">Kategori laporan</label>
+              <select id="fKategori" required></select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="fPeriode">Periode (bulan)</label>
+              <input type="month" id="fPeriode" required>
+            </div>
+            <div class="field">
+              <label for="fJudul">Judul laporan</label>
+              <input type="text" id="fJudul" placeholder="Contoh: Laporan Kegiatan Belajar Mengajar" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="fIsi">Isi laporan</label>
+            <textarea id="fIsi" rows="6" placeholder="Jelaskan kondisi, kegiatan, atau permasalahan yang dilaporkan secara rinci..." required></textarea>
+          </div>
+          <div class="field">
+            <label for="fLampiran">Lampiran foto (opsional)</label>
+            <input type="file" id="fLampiran" accept="image/*">
+            <p id="lampiranPreviewName" class="hint-text"></p>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Kirim laporan</button>
+            <span class="form-status" id="formStatus"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- VIEW: SEKOLAH BINAAN ---------- -->
+    <section class="view" id="view-sekolah" hidden>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Tambah sekolah binaan</h2>
+        </div>
+        <form id="sekolahForm" class="field-row wrap">
+          <div class="field">
+            <label for="sNama">Nama sekolah</label>
+            <input type="text" id="sNama" required>
+          </div>
+          <div class="field">
+            <label for="sNpsn">NPSN</label>
+            <input type="text" id="sNpsn" required>
+          </div>
+          <div class="field">
+            <label for="sJenjang">Jenjang</label>
+            <select id="sJenjang">
+              <option>PAUD</option><option>SD</option><option>SMP</option><option>SMA</option><option>SMK</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sKepsek">Kepala sekolah</label>
+            <input type="text" id="sKepsek" required>
+          </div>
+          <div class="field">
+            <label for="sPengawas">Pengawas pembina</label>
+            <input type="text" id="sPengawas" required>
+          </div>
+          <div class="field grow">
+            <label for="sAlamat">Alamat</label>
+            <input type="text" id="sAlamat" required>
+          </div>
+          <div class="field field-btn">
+            <button type="submit" class="btn-primary">Tambah sekolah</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Daftar sekolah binaan</h2></div>
+        <div id="schoolTable" class="school-table"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ DETAIL / REVIEW MODAL ============ -->
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" id="modalClose" type="button" aria-label="Tutup">&times;</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
